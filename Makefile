@@ -1,0 +1,50 @@
+.PHONY: install format format-check lint typecheck test test-integration test-e2e \
+	migration-check compose-build compose-up compose-down precommit ci
+
+UV ?= uv
+PNPM ?= pnpm
+
+install:
+	$(UV) sync --group dev
+	$(PNPM) install --frozen-lockfile
+
+format:
+	$(UV) run ruff format .
+	$(UV) run ruff check --fix .
+
+format-check:
+	$(UV) run ruff format --check .
+
+lint:
+	$(UV) run ruff check .
+
+typecheck:
+	$(UV) run mypy
+	$(PNPM) run typecheck
+
+test:
+	$(UV) run pytest
+
+test-integration:
+	$(UV) run pytest tests/integration
+
+test-e2e:
+	@echo "End-to-end tests are not implemented yet." >&2
+	@exit 1
+
+migration-check:
+	@echo "Migration checks are not implemented yet." >&2
+	@exit 1
+
+compose-build:
+	docker compose build
+
+compose-up:
+	docker compose up --build
+
+compose-down:
+	docker compose down
+
+precommit: format-check lint typecheck
+
+ci: format-check lint typecheck test
