@@ -1,0 +1,72 @@
+[project]
+name = "robot-control-platform"
+version = "0.1.0"
+description = "Simulated warehouse robot experimentation platform."
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+license = { text = "Apache-2.0" }
+dependencies = [
+    "robot-control-platform-api",
+    "robot-control-platform-common",
+    "robot-control-platform-simulator",
+]
+
+[dependency-groups]
+dev = [
+    "hypothesis>=6.122",
+    "mypy>=1.14",
+    "pytest>=8.3",
+    "pytest-asyncio>=0.25",
+    "pytest-cov>=6.0",
+    "ruff>=0.9",
+]
+
+[tool.uv]
+package = false
+
+[tool.uv.workspace]
+members = [
+    "apps/api",
+    "packages/py-common",
+    "services/simulator",
+]
+
+[tool.uv.sources]
+robot-control-platform-api = { workspace = true }
+robot-control-platform-common = { workspace = true }
+robot-control-platform-simulator = { workspace = true }
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = [
+    ".venv",
+    "node_modules",
+    "dist",
+    "build",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.mypy]
+strict = true
+python_version = "3.12"
+files = [
+    "packages/py-common/robot_control_platform_common",
+    "apps/api/robot_control_platform_api",
+    "services/simulator/robot_control_platform_simulator",
+    "tests",
+]
+mypy_path = "packages/py-common:apps/api:services/simulator"
+explicit_package_bases = true
+show_error_codes = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = [
+    "packages/py-common",
+    "apps/api",
+    "services/simulator",
+]
+addopts = ["-q"]
