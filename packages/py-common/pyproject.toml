@@ -4,7 +4,12 @@ version = "0.1.0"
 description = "Shared Python primitives for the robot control platform."
 requires-python = ">=3.12,<3.13"
 license = { text = "Apache-2.0" }
-dependencies = []
+# Dependency versions resolved 2026-08-21 for Pydantic v2, pydantic-settings, and structlog.
+dependencies = [
+    "pydantic>=2.10,<3",
+    "pydantic-settings>=2.7,<3",
+    "structlog>=25.1,<26",
+]
 
 [build-system]
 requires = ["hatchling"]
