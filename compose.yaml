@@ -1,0 +1,161 @@
+name: robot-control-platform
+
+x-rcp-environment: &rcp-environment
+  RCP_ENV: ${RCP_ENV:-development}
+  RCP_LOG_LEVEL: ${RCP_LOG_LEVEL:-INFO}
+  RCP_DATABASE_HOST: db
+  RCP_DATABASE_PORT: "5432"
+  RCP_DATABASE_NAME: robot_platform
+  RCP_DATABASE_USER: robot_app
+  RCP_DATABASE_PASSWORD: ${RCP_DATABASE_PASSWORD:-change-me}
+  RCP_ARTIFACT_ROOT: /var/lib/robot-platform/artifacts
+  RCP_API_BASE_URL: http://api:8000
+  RCP_WORKER_ID: ${RCP_WORKER_ID:-compose-simulator-1}
+  RCP_RUN_LEASE_SECONDS: ${RCP_RUN_LEASE_SECONDS:-30}
+  RCP_RUN_HEARTBEAT_SECONDS: ${RCP_RUN_HEARTBEAT_SECONDS:-10}
+  RCP_SIMULATION_GUI: "false"
+
+services:
+  db:
+    image: postgres:16-bookworm@sha256:60f4761b9035e0b8d5218f701a8c3382f641bf12b1604822574cf5be3baeb537
+    environment:
+      POSTGRES_USER: robot_app
+      POSTGRES_PASSWORD: ${RCP_DATABASE_PASSWORD:-change-me}
+      POSTGRES_DB: robot_platform
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - backend
+    init: true
+    mem_limit: 512m
+    cpus: "1.0"
+    stop_grace_period: 20s
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U robot_app -d robot_platform"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    environment:
+      <<: *rcp-environment
+    volumes:
+      - robot_artifacts:/var/lib/robot-platform/artifacts:ro
+    networks:
+      - backend
+      - frontend
+    expose:
+      - "8000"
+    init: true
+    read_only: true
+    user: "10001:10001"
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+      - /run:uid=10001,gid=10001,mode=0755
+    mem_limit: 512m
+    cpus: "1.0"
+    stop_grace_period: 15s
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "from urllib.request import urlopen; urlopen('http://127.0.0.1:8000/health/live', timeout=2).read()",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+
+  simulator:
+    build:
+      context: .
+      dockerfile: services/simulator/Dockerfile
+    environment:
+      <<: *rcp-environment
+    volumes:
+      - robot_artifacts:/var/lib/robot-platform/artifacts
+    networks:
+      - backend
+    init: true
+    read_only: true
+    user: "10001:10001"
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+      - /run:uid=10001,gid=10001,mode=0755
+    mem_limit: 512m
+    cpus: "1.0"
+    stop_grace_period: 15s
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "from pathlib import Path; raise SystemExit(0 if Path('/tmp/robot-platform-healthy').is_file() else 1)",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+
+  web:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile
+    init: true
+    read_only: true
+    user: "101:101"
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    tmpfs:
+      - /tmp:size=32m,mode=1777
+      - /var/cache/nginx:uid=101,gid=101,mode=0755
+      - /var/run:uid=101,gid=101,mode=0755
+    mem_limit: 128m
+    cpus: "0.50"
+    stop_grace_period: 10s
+    stop_signal: SIGQUIT
+    ports:
+      - "3000:8080"
+    networks:
+      - frontend
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8080/"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+
+networks:
+  backend:
+    internal: true
+  frontend:
+
+volumes:
+  postgres_data:
+  robot_artifacts:

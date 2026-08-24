@@ -1,10 +1,7 @@
 # Robot Control Platform
 
-Robot Control Platform is a software simulation and review system for warehouse pick-and-sort experiments. This repository currently provides the pinned Python and Node workspaces, quality-check toolchain, and configuration templates used to develop that system locally.
+Robot Control Platform is a software simulation and review system for warehouse pick-and-sort experiments. This repository currently provides the pinned Python and Node workspaces, quality-check toolchain, configuration templates, and a four-service Docker Compose shell used to develop that system locally.
 
-## Status
-
-Repository skeleton. Application services are not implemented yet.
 
 ## Prerequisites
 
@@ -12,4 +9,4 @@ Repository skeleton. Application services are not implemented yet.
 - Node.js 22.23.2
 - pnpm 11.5.2
 - GNU Make
-- Docker (required for later Compose workflows)
+- Docker Compose (required to run the local four-service shell)
