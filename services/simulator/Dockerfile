@@ -10,6 +10,11 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     UV_NO_CACHE=1 \
     UV_NO_EDITABLE=1
 
+# PyBullet 3.2.7 has no cp312 wheel; compile the sdist with g++.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
 RUN pip install --no-cache-dir uv==0.11.7
 
 COPY pyproject.toml uv.lock ./
@@ -27,7 +32,13 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PATH="/app/.venv/bin:${PATH}" \
     HOME=/tmp
 
-RUN groupadd --system --gid 10001 app \
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        libgl1 \
+        libglib2.0-0 \
+        libgomp1 \
+    && rm -rf /var/lib/apt/lists/* \
+    && groupadd --system --gid 10001 app \
     && useradd --system --uid 10001 --gid 10001 --no-create-home --home-dir /tmp --shell /usr/sbin/nologin app \
     && mkdir -p /var/lib/robot-platform/artifacts \
     && chown 10001:10001 /var/lib/robot-platform/artifacts

@@ -62,6 +62,10 @@ mypy_path = "packages/py-common:apps/api:services/simulator"
 explicit_package_bases = true
 show_error_codes = true
 
+[[tool.mypy.overrides]]
+module = ["pybullet", "pybullet_data"]
+ignore_missing_imports = true
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = [
