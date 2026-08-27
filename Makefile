@@ -1,5 +1,6 @@
 .PHONY: install format format-check lint typecheck test test-integration test-e2e \
-	migration-check compose-build compose-up compose-down precommit ci
+	migration-check compose-build compose-up compose-down precommit ci \
+	test-simulator-smoke
 
 UV ?= uv
 PNPM ?= pnpm
@@ -31,6 +32,10 @@ test-integration:
 test-e2e:
 	@echo "End-to-end tests are not implemented yet." >&2
 	@exit 1
+
+test-simulator-smoke:
+	docker compose build simulator
+	docker compose run --rm --no-deps simulator python -m robot_control_platform_simulator.physics.smoke
 
 migration-check:
 	@echo "Migration checks are not implemented yet." >&2
