@@ -4,10 +4,12 @@ version = "0.1.0"
 description = "Simulator worker package for the robot control platform."
 requires-python = ">=3.12,<3.13"
 license = { text = "Apache-2.0" }
-# Dependency versions resolved 2026-08-26 for NumPy 2.x and PyBullet 3.2.7.
+# Dependency versions resolved 2026-08-26 for NumPy 2.x and PyBullet 3.2.7,
+# and 2026-08-27 for Pillow 12.x.
 # PyBullet 3.2.7 has no cp312 wheels; the linux simulator image compiles the sdist.
 dependencies = [
     "numpy>=2.2,<3",
+    "pillow>=12.3,<13",
     "pybullet==3.2.7; sys_platform == 'linux'",
     "robot-control-platform-common",
 ]
