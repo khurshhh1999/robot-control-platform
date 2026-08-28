@@ -1,6 +1,6 @@
 .PHONY: install format format-check lint typecheck test test-integration test-e2e \
 	migration-check compose-build compose-up compose-down precommit ci \
-	test-simulator-smoke test-camera-smoke
+	test-simulator-smoke test-camera-smoke test-scenario-smoke
 
 UV ?= uv
 PNPM ?= pnpm
@@ -47,6 +47,10 @@ test-camera-smoke:
 		python -m robot_control_platform_simulator.physics.camera_smoke \
 		--output /out/review_rgb.png && \
 	echo "wrote $$outdir/review_rgb.png"
+
+test-scenario-smoke:
+	docker compose build simulator
+	docker compose run --rm --no-deps simulator python -m robot_control_platform_simulator.scenarios.smoke
 
 migration-check:
 	@echo "Migration checks are not implemented yet." >&2
