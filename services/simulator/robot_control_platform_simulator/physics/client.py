@@ -422,6 +422,74 @@ class PhysicsClient:
             raise SimulationError("failed to create a static workcell body")
         return body_id
 
+    def get_camera_image(
+        self,
+        *,
+        width_px: int,
+        height_px: int,
+        view_matrix: tuple[float, ...],
+        projection_matrix: tuple[float, ...],
+        renderer: str,
+    ) -> tuple[object, object, object]:
+        """Capture RGBA, depth, and segmentation. Callers persist only RGB in v1."""
+
+        if width_px <= 0 or height_px <= 0:
+            raise SimulationError("camera dimensions must be positive")
+        view = _as_matrix16(view_matrix, "view_matrix")
+        projection = _as_matrix16(projection_matrix, "projection_matrix")
+        renderer_id = renderer_constant(renderer)
+        try:
+            result = _pybullet().getCameraImage(
+                width_px,
+                height_px,
+                viewMatrix=list(view),
+                projectionMatrix=list(projection),
+                renderer=renderer_id,
+                physicsClientId=self.physics_client_id,
+            )
+        except Exception as exc:
+            raise SimulationError("camera capture failed") from exc
+        if not isinstance(result, (tuple, list)) or len(result) < 5:
+            raise SimulationError("camera capture returned an incomplete buffer set")
+        return result[2], result[3], result[4]
+
+
+def engine_view_matrix(eye: Vector3, target: Vector3, up: Vector3) -> tuple[float, ...]:
+    """Return PyBullet's look-at view matrix. Requires the engine package."""
+
+    raw = _pybullet().computeViewMatrix(
+        list(eye.to_checksum_payload()),
+        list(target.to_checksum_payload()),
+        list(up.to_checksum_payload()),
+    )
+    return _as_matrix16(raw, "view_matrix")
+
+
+def engine_projection_matrix_fov(
+    field_of_view_degrees: float,
+    aspect_ratio: float,
+    near_plane_meters: float,
+    far_plane_meters: float,
+) -> tuple[float, ...]:
+    """Return PyBullet's FOV projection matrix. Requires the engine package."""
+
+    raw = _pybullet().computeProjectionMatrixFOV(
+        field_of_view_degrees, aspect_ratio, near_plane_meters, far_plane_meters
+    )
+    return _as_matrix16(raw, "projection_matrix")
+
+
+def renderer_constant(renderer: str) -> int:
+    if renderer != "tiny":
+        raise SimulationError(f"unsupported camera renderer: {renderer}")
+    return int(_pybullet().ER_TINY_RENDERER)
+
+
+def _as_matrix16(raw: object, field: str) -> tuple[float, ...]:
+    if not isinstance(raw, (list, tuple)) or len(raw) != 16:
+        raise SimulationError(f"{field} must have length 16")
+    return tuple(require_finite(f"{field}[{index}]", raw[index]) for index in range(16))
+
 
 def _decode_joint_name(raw: object) -> str:
     if isinstance(raw, bytes):

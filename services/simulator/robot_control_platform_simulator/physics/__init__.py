@@ -1,5 +1,16 @@
-"""PyBullet adapter, workcell scene, and joint reset helpers."""
+"""PyBullet adapter, workcell scene, camera, and joint reset helpers."""
 
+from robot_control_platform_simulator.physics.camera import (
+    CAMERA_HEIGHT_PX,
+    CAMERA_RENDERER,
+    CAMERA_WIDTH_PX,
+    CameraCapture,
+    CameraConfig,
+    capture_rgb_frame,
+    decode_rgb_png,
+    default_camera_config,
+    encode_rgb_png,
+)
 from robot_control_platform_simulator.physics.client import (
     WORLD_FRAME,
     PhysicsClient,
@@ -7,6 +18,8 @@ from robot_control_platform_simulator.physics.client import (
     SimulationError,
     connection_mode_for_gui,
     default_physics_config,
+    engine_projection_matrix_fov,
+    engine_view_matrix,
 )
 from robot_control_platform_simulator.physics.robot import (
     JointSpec,
@@ -26,8 +39,13 @@ from robot_control_platform_simulator.physics.scene import (
 
 __all__ = [
     "ALLOWED_ASSETS",
+    "CAMERA_HEIGHT_PX",
+    "CAMERA_RENDERER",
+    "CAMERA_WIDTH_PX",
     "SCENE_BODY_NAMES",
     "WORLD_FRAME",
+    "CameraCapture",
+    "CameraConfig",
     "JointSpec",
     "PhysicsClient",
     "PhysicsConfig",
@@ -35,10 +53,16 @@ __all__ = [
     "SimulationError",
     "WorkcellScene",
     "WorkcellSnapshot",
+    "capture_rgb_frame",
     "connection_mode_for_gui",
+    "decode_rgb_png",
+    "default_camera_config",
     "default_physics_config",
     "default_scene_config",
     "discover_controlled_joints",
+    "encode_rgb_png",
+    "engine_projection_matrix_fov",
+    "engine_view_matrix",
     "reset_controlled_joints",
     "resolve_allowlisted_asset",
     "run_reset_smoke",

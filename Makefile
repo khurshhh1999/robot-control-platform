@@ -1,6 +1,6 @@
 .PHONY: install format format-check lint typecheck test test-integration test-e2e \
 	migration-check compose-build compose-up compose-down precommit ci \
-	test-simulator-smoke
+	test-simulator-smoke test-camera-smoke
 
 UV ?= uv
 PNPM ?= pnpm
@@ -36,6 +36,17 @@ test-e2e:
 test-simulator-smoke:
 	docker compose build simulator
 	docker compose run --rm --no-deps simulator python -m robot_control_platform_simulator.physics.smoke
+
+test-camera-smoke:
+	@outdir="$${RCP_CAMERA_SMOKE_DIR:-$$(mktemp -d /tmp/rcp-camera-smoke.XXXXXX)}"; \
+	mkdir -p "$$outdir" && \
+	docker compose build simulator && \
+	docker compose run --rm --no-deps \
+		-v "$$outdir:/out" \
+		simulator \
+		python -m robot_control_platform_simulator.physics.camera_smoke \
+		--output /out/review_rgb.png && \
+	echo "wrote $$outdir/review_rgb.png"
 
 migration-check:
 	@echo "Migration checks are not implemented yet." >&2
