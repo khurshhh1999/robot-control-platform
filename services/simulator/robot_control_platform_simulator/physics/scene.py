@@ -212,6 +212,11 @@ class WorkcellScene:
         except KeyError as exc:
             raise SimulationError(f"unknown workcell body: {name}") from exc
 
+    def body_id_to_name(self) -> dict[int, str]:
+        """Return the ephemeral body-id to logical-name map. Callers must not persist ids."""
+
+        return {body_id: name for name, body_id in self._body_ids.items()}
+
     def reset(self) -> WorkcellSnapshot:
         self._body_ids = {}
         self._joint_specs = ()

@@ -1,4 +1,4 @@
-"""PyBullet adapter, workcell scene, camera, and joint reset helpers."""
+"""PyBullet adapter, workcell scene, camera, contacts, and joint reset helpers."""
 
 from robot_control_platform_simulator.physics.camera import (
     CAMERA_HEIGHT_PX,
@@ -15,11 +15,23 @@ from robot_control_platform_simulator.physics.client import (
     WORLD_FRAME,
     PhysicsClient,
     PhysicsConfig,
+    RawContactPoint,
     SimulationError,
     connection_mode_for_gui,
     default_physics_config,
     engine_projection_matrix_fov,
     engine_view_matrix,
+    parse_engine_contact_point,
+)
+from robot_control_platform_simulator.physics.contacts import (
+    ANY_LINK,
+    BASE_LINK_NAME,
+    CollisionAssessment,
+    CollisionConfig,
+    CollisionMonitor,
+    ProhibitedPair,
+    default_collision_config,
+    sample_contacts,
 )
 from robot_control_platform_simulator.physics.robot import (
     JointSpec,
@@ -47,11 +59,18 @@ __all__ = [
     "CAMERA_WIDTH_PX",
     "SCENE_BODY_NAMES",
     "WORLD_FRAME",
+    "ANY_LINK",
+    "BASE_LINK_NAME",
     "CameraCapture",
+    "CollisionAssessment",
+    "CollisionConfig",
+    "CollisionMonitor",
     "CameraConfig",
     "JointSpec",
     "PhysicsClient",
     "PhysicsConfig",
+    "ProhibitedPair",
+    "RawContactPoint",
     "RobotLayout",
     "SceneConfig",
     "SimulationError",
@@ -61,6 +80,7 @@ __all__ = [
     "connection_mode_for_gui",
     "decode_rgb_png",
     "default_camera_config",
+    "default_collision_config",
     "default_physics_config",
     "default_scene_config",
     "discover_and_validate_robot_layout",
@@ -68,7 +88,9 @@ __all__ = [
     "encode_rgb_png",
     "engine_projection_matrix_fov",
     "engine_view_matrix",
+    "parse_engine_contact_point",
     "reset_controlled_joints",
+    "sample_contacts",
     "resolve_allowlisted_asset",
     "run_reset_smoke",
     "validate_ik_solution",

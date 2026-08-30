@@ -137,6 +137,34 @@ def default_physics_config() -> PhysicsConfig:
 
 
 @dataclass(frozen=True)
+class RawContactPoint:
+    """Ephemeral engine contact sample. Body ids are not persisted."""
+
+    body_unique_id_a: int
+    body_unique_id_b: int
+    link_index_a: int
+    link_index_b: int
+    position_world_on_a_meters: Vector3
+    contact_normal_on_b: Vector3
+    normal_force_newtons: float
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "body_unique_id_a", _require_body_id(self.body_unique_id_a))
+        object.__setattr__(self, "body_unique_id_b", _require_body_id(self.body_unique_id_b))
+        object.__setattr__(self, "link_index_a", _require_link_index(self.link_index_a))
+        object.__setattr__(self, "link_index_b", _require_link_index(self.link_index_b))
+        if not isinstance(self.position_world_on_a_meters, Vector3):
+            raise SimulationError("contact position is invalid")
+        if not isinstance(self.contact_normal_on_b, Vector3):
+            raise SimulationError("contact normal is invalid")
+        object.__setattr__(
+            self,
+            "normal_force_newtons",
+            require_finite("normal_force_newtons", self.normal_force_newtons),
+        )
+
+
+@dataclass(frozen=True)
 class JointRecord:
     """Ephemeral joint description discovered from the current body id."""
 
@@ -657,6 +685,38 @@ class PhysicsClient:
             raise SimulationError("camera capture returned an incomplete buffer set")
         return result[2], result[3], result[4]
 
+    def get_contact_points(self) -> tuple[RawContactPoint, ...]:
+        """Return the current contact manifold. Body ids remain ephemeral."""
+
+        try:
+            raw = _pybullet().getContactPoints(physicsClientId=self.physics_client_id)
+        except Exception as exc:
+            raise SimulationError("contact query failed") from exc
+        if raw is None:
+            return ()
+        if not isinstance(raw, (list, tuple)):
+            raise SimulationError("contact query returned an invalid manifold")
+        return tuple(parse_engine_contact_point(item) for item in raw)
+
+
+def parse_engine_contact_point(raw: object) -> RawContactPoint:
+    """Parse one PyBullet contact tuple into a typed ephemeral sample."""
+
+    if not isinstance(raw, (list, tuple)) or len(raw) < 10:
+        raise SimulationError("contact query returned an incomplete contact point")
+    try:
+        return RawContactPoint(
+            body_unique_id_a=_require_body_id(raw[1]),
+            body_unique_id_b=_require_body_id(raw[2]),
+            link_index_a=_require_link_index(raw[3]),
+            link_index_b=_require_link_index(raw[4]),
+            position_world_on_a_meters=Vector3.from_xyz(raw[5]),
+            contact_normal_on_b=Vector3.from_xyz(raw[7]),
+            normal_force_newtons=require_finite("normal_force_newtons", raw[9]),
+        )
+    except (TypeError, ValueError) as exc:
+        raise SimulationError("contact query returned an invalid contact point") from exc
+
 
 def engine_view_matrix(eye: Vector3, target: Vector3, up: Vector3) -> tuple[float, ...]:
     """Return PyBullet's look-at view matrix. Requires the engine package."""
@@ -701,6 +761,18 @@ def _finite_tuple(field: str, values: object) -> tuple[float, ...]:
     if len(values) == 0:
         raise SimulationError(f"{field} is invalid")
     return tuple(require_finite(f"{field}[{index}]", values[index]) for index in range(len(values)))
+
+
+def _require_body_id(value: object) -> int:
+    if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+        raise SimulationError("contact body id is invalid")
+    return value
+
+
+def _require_link_index(value: object) -> int:
+    if isinstance(value, bool) or not isinstance(value, int) or value < -1:
+        raise SimulationError("contact link index is invalid")
+    return value
 
 
 def _decode_joint_name(raw: object) -> str:
