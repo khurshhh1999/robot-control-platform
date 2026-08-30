@@ -10,7 +10,7 @@ from robot_control_platform_simulator.domain.enums import (
     TerminalOutcome,
     TrialStatus,
 )
-from robot_control_platform_simulator.domain.events import ContactEvent
+from robot_control_platform_simulator.domain.events import ContactEvent, TrialEvent
 from robot_control_platform_simulator.domain.models import (
     DOMAIN_SCHEMA_VERSION,
     UNIT_VECTOR_TOLERANCE,
@@ -40,6 +40,7 @@ __all__ = [
     "QuaternionXYZW",
     "RunStatus",
     "TerminalOutcome",
+    "TrialEvent",
     "TrialStatus",
     "Vector3",
     "canonical_dumps",
