@@ -1,6 +1,6 @@
 .PHONY: install format format-check lint typecheck test test-integration test-e2e \
 	migration-check compose-build compose-up compose-down precommit ci \
-	test-simulator-smoke test-camera-smoke test-scenario-smoke
+	test-simulator-smoke test-camera-smoke test-scenario-smoke test-motion-smoke
 
 UV ?= uv
 PNPM ?= pnpm
@@ -51,6 +51,18 @@ test-camera-smoke:
 test-scenario-smoke:
 	docker compose build simulator
 	docker compose run --rm --no-deps simulator python -m robot_control_platform_simulator.scenarios.smoke
+
+test-motion-smoke:
+	@test -f .project-private/motion-reliability.json || { \
+		echo "motion reliability configuration is missing" >&2; \
+		exit 1; \
+	}
+	docker compose build simulator
+	docker compose run --rm --no-deps \
+		-v "$(CURDIR)/.project-private/motion-reliability.json:/tmp/motion-reliability.json:ro" \
+		simulator \
+		python -m robot_control_platform_simulator.control.smoke \
+		--config /tmp/motion-reliability.json
 
 migration-check:
 	@echo "Migration checks are not implemented yet." >&2
