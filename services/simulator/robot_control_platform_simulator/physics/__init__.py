@@ -23,8 +23,11 @@ from robot_control_platform_simulator.physics.client import (
 )
 from robot_control_platform_simulator.physics.robot import (
     JointSpec,
+    RobotLayout,
+    discover_and_validate_robot_layout,
     discover_controlled_joints,
     reset_controlled_joints,
+    validate_ik_solution,
 )
 from robot_control_platform_simulator.physics.scene import (
     ALLOWED_ASSETS,
@@ -49,6 +52,7 @@ __all__ = [
     "JointSpec",
     "PhysicsClient",
     "PhysicsConfig",
+    "RobotLayout",
     "SceneConfig",
     "SimulationError",
     "WorkcellScene",
@@ -59,6 +63,7 @@ __all__ = [
     "default_camera_config",
     "default_physics_config",
     "default_scene_config",
+    "discover_and_validate_robot_layout",
     "discover_controlled_joints",
     "encode_rgb_png",
     "engine_projection_matrix_fov",
@@ -66,4 +71,5 @@ __all__ = [
     "reset_controlled_joints",
     "resolve_allowlisted_asset",
     "run_reset_smoke",
+    "validate_ik_solution",
 ]
