@@ -1,4 +1,4 @@
-"""Robot motion primitives, controller state machine, and reliability gating."""
+"""Robot motion primitives, controller, outcome classifier, and reliability gating."""
 
 from robot_control_platform_simulator.control.actions import (
     PHYSICS_CONTROL_HZ,
@@ -10,6 +10,22 @@ from robot_control_platform_simulator.control.actions import (
     MotionPrimitive,
     control_period_seconds,
     downward_pose,
+)
+from robot_control_platform_simulator.control.outcomes import (
+    ALLOWED_SYSTEM_ERROR_CODES,
+    OUTCOME_PRECEDENCE,
+    GraspSample,
+    OutcomeClassification,
+    OutcomeClassificationConfig,
+    OutcomeEvidence,
+    PlacementSample,
+    classify_outcome,
+    default_bin_poses,
+    default_outcome_classification_config,
+    emit_outcome_event,
+    is_gripper_object_contact,
+    object_center_in_bin,
+    sanitize_infrastructure_failure,
 )
 from robot_control_platform_simulator.control.pick_place import (
     PickPlaceResult,
@@ -33,27 +49,41 @@ from robot_control_platform_simulator.control.state_machine import (
 )
 
 __all__ = [
+    "ALLOWED_SYSTEM_ERROR_CODES",
     "ALLOWED_TRANSITIONS",
     "HAPPY_PATH_TRANSITIONS",
+    "OUTCOME_PRECEDENCE",
     "PHYSICS_CONTROL_HZ",
     "PHYSICS_STEPS_PER_CONTROL",
     "ActionResult",
     "ActionStatus",
     "ControllerStateMachine",
+    "GraspSample",
     "InvalidControllerTransition",
     "MotionCommand",
     "MotionController",
     "MotionPrimitive",
     "MotionReliabilityGate",
+    "OutcomeClassification",
+    "OutcomeClassificationConfig",
+    "OutcomeEvidence",
     "PickPlaceResult",
+    "PlacementSample",
     "ReliabilityReport",
     "TrialEventLog",
     "allowed_targets",
+    "classify_outcome",
     "control_period_seconds",
+    "default_bin_poses",
+    "default_outcome_classification_config",
     "downward_pose",
+    "emit_outcome_event",
     "evaluate_reliability_gate",
     "is_allowed_transition",
+    "is_gripper_object_contact",
     "load_motion_reliability_gate",
+    "object_center_in_bin",
     "object_in_target_region",
     "run_centered_cube_pick_place",
+    "sanitize_infrastructure_failure",
 ]
