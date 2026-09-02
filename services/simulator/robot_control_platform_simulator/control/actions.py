@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import math
+from collections.abc import Sequence
 from dataclasses import dataclass
 from enum import StrEnum
 from typing import Final
@@ -302,6 +303,135 @@ def downward_pose(position: Vector3) -> Pose:
 
 def control_period_seconds() -> float:
     return PHYSICS_TIMESTEP_SECONDS * PHYSICS_STEPS_PER_CONTROL
+
+
+EE_TOOL_OFFSET_METERS: Final[float] = 0.13
+EE_XY_OFFSET_METERS: Final[Vector3] = Vector3(x=-0.16, y=0.0, z=0.0)
+FIXED_APPROACH_CLEARANCE_METERS: Final[float] = 0.10
+FIXED_LIFT_CLEARANCE_METERS: Final[float] = 0.14
+SAFER_LIFT_CLEARANCE_METERS: Final[float] = 0.18
+NOMINAL_OBJECT_HALF_HEIGHT_METERS: Final[float] = 0.025
+VIA_CLEARANCE_METERS: Final[float] = 0.06
+DEFAULT_MOVE_TIMEOUT_SECONDS: Final[float] = 8.0
+DEFAULT_GRIPPER_TIMEOUT_SECONDS: Final[float] = 2.0
+DEFAULT_HOLD_TIMEOUT_SECONDS: Final[float] = 0.40
+DEFAULT_SETTLE_TIMEOUT_SECONDS: Final[float] = 1.00
+CONSERVATIVE_SETTLE_TIMEOUT_SECONDS: Final[float] = 1.50
+DEFAULT_MOVE_TOLERANCE_METERS: Final[float] = 0.04
+DEFAULT_GRIPPER_TOLERANCE_RADIANS: Final[float] = 0.05
+DEFAULT_SETTLE_VELOCITY_TOLERANCE: Final[float] = 0.25
+
+
+def end_effector_pose(object_position: Vector3, ee_z_meters: float, xy_offset: Vector3) -> Pose:
+    """Return a downward end-effector pose above an XY point at ``ee_z_meters``."""
+
+    if not isinstance(object_position, Vector3):
+        msg = "object_position must be a Vector3"
+        raise ValueError(msg)
+    if not isinstance(xy_offset, Vector3):
+        msg = "xy_offset must be a Vector3"
+        raise ValueError(msg)
+    height = require_finite("ee_z_meters", ee_z_meters)
+    return downward_pose(
+        Vector3(
+            x=object_position.x + xy_offset.x,
+            y=object_position.y + xy_offset.y,
+            z=height,
+        )
+    )
+
+
+def interpolate_xy(start: Vector3, end: Vector3, fraction: float) -> Vector3:
+    """Return an XY blend. ``z`` is taken from ``start`` and is not used as a waypoint height."""
+
+    if not isinstance(start, Vector3):
+        msg = "start must be a Vector3"
+        raise ValueError(msg)
+    if not isinstance(end, Vector3):
+        msg = "end must be a Vector3"
+        raise ValueError(msg)
+    blend = require_finite("fraction", fraction)
+    if blend < 0.0 or blend > 1.0:
+        msg = "fraction must be between 0 and 1"
+        raise ValueError(msg)
+    return Vector3(
+        x=start.x + (end.x - start.x) * blend,
+        y=start.y + (end.y - start.y) * blend,
+        z=start.z,
+    )
+
+
+def fixed_object_center_z(table_top_z_meters: float, nominal_half_height_meters: float) -> float:
+    return require_finite("table_top_z_meters", table_top_z_meters) + require_finite(
+        "nominal_half_height_meters", nominal_half_height_meters
+    )
+
+
+def move_end_effector_command(
+    pose: Pose, *, timeout_seconds: float, tolerance_meters: float
+) -> MotionCommand:
+    if not isinstance(pose, Pose):
+        msg = "pose must be a Pose"
+        raise ValueError(msg)
+    return MotionCommand(
+        MotionPrimitive.MOVE_END_EFFECTOR,
+        timeout_seconds,
+        tolerance_meters,
+        target_pose=pose,
+    )
+
+
+def open_command(*, timeout_seconds: float, tolerance_radians: float) -> MotionCommand:
+    return MotionCommand(MotionPrimitive.OPEN, timeout_seconds, tolerance_radians)
+
+
+def close_command(*, timeout_seconds: float, tolerance_radians: float) -> MotionCommand:
+    return MotionCommand(MotionPrimitive.CLOSE, timeout_seconds, tolerance_radians)
+
+
+def hold_command(*, timeout_seconds: float, tolerance: float) -> MotionCommand:
+    return MotionCommand(MotionPrimitive.HOLD, timeout_seconds, tolerance)
+
+
+def settle_command(*, timeout_seconds: float, tolerance: float) -> MotionCommand:
+    return MotionCommand(MotionPrimitive.SETTLE, timeout_seconds, tolerance)
+
+
+def retract_command(
+    pose: Pose, *, timeout_seconds: float, tolerance_meters: float
+) -> MotionCommand:
+    if not isinstance(pose, Pose):
+        msg = "pose must be a Pose"
+        raise ValueError(msg)
+    return MotionCommand(
+        MotionPrimitive.RETRACT,
+        timeout_seconds,
+        tolerance_meters,
+        target_pose=pose,
+    )
+
+
+def actions_from_commands(
+    commands: Sequence[MotionCommand], *, simulation_time_seconds: float
+) -> tuple[Action, ...]:
+    """Map motion commands to domain ``Action`` values at the observation time."""
+
+    if not isinstance(commands, Sequence) or isinstance(commands, (str, bytes, bytearray)):
+        msg = "commands must be a sequence of MotionCommand values"
+        raise ValueError(msg)
+    actions: list[Action] = []
+    for command in commands:
+        if not isinstance(command, MotionCommand):
+            msg = "commands must be a sequence of MotionCommand values"
+            raise ValueError(msg)
+        actions.append(
+            Action(
+                name=command.primitive.value,
+                simulation_time_seconds=simulation_time_seconds,
+                target_pose=command.target_pose,
+            )
+        )
+    return tuple(actions)
 
 
 def _pose_error_meters(target: Pose, observed: Pose) -> float:
