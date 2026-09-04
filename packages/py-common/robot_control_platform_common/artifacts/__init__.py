@@ -1,6 +1,6 @@
-"""Shared Python primitives for the robot control platform."""
+"""Filesystem-backed artifact storage with checksum integrity checks."""
 
-from robot_control_platform_common.artifacts import (
+from robot_control_platform_common.artifacts.base import (
     ARTIFACT_EXTENSIONS,
     ARTIFACT_MEDIA_TYPES,
     STANDARD_ARTIFACT_KINDS,
@@ -12,30 +12,17 @@ from robot_control_platform_common.artifacts import (
     ArtifactSizeError,
     ArtifactStore,
     ArtifactStoreError,
-    FilesystemArtifactStore,
+    artifact_storage_key,
+    sha256_hex_bytes,
+)
+from robot_control_platform_common.artifacts.filesystem import FilesystemArtifactStore
+from robot_control_platform_common.artifacts.integrity import (
     QuarantineResult,
     ReconciliationIssue,
     ReconciliationIssueKind,
     ReconciliationReport,
-    artifact_storage_key,
     reconcile_artifacts,
-    sha256_hex_bytes,
 )
-from robot_control_platform_common.config import (
-    ConfigurationError,
-    LogLevel,
-    RuntimeEnv,
-    Settings,
-    load_settings,
-)
-from robot_control_platform_common.ids import new_id
-from robot_control_platform_common.logging import (
-    bind_log_context,
-    clear_log_context,
-    configure_logging,
-    get_logger,
-)
-from robot_control_platform_common.time import to_iso8601_z, utc_now
 
 __all__ = [
     "ARTIFACT_EXTENSIONS",
@@ -49,24 +36,12 @@ __all__ = [
     "ArtifactSizeError",
     "ArtifactStore",
     "ArtifactStoreError",
-    "ConfigurationError",
     "FilesystemArtifactStore",
-    "LogLevel",
     "QuarantineResult",
     "ReconciliationIssue",
     "ReconciliationIssueKind",
     "ReconciliationReport",
-    "RuntimeEnv",
-    "Settings",
     "artifact_storage_key",
-    "bind_log_context",
-    "clear_log_context",
-    "configure_logging",
-    "get_logger",
-    "load_settings",
-    "new_id",
     "reconcile_artifacts",
     "sha256_hex_bytes",
-    "to_iso8601_z",
-    "utc_now",
 ]
