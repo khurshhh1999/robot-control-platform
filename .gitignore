@@ -38,7 +38,7 @@ coverage/
 .pnpm-store/
 
 # Generated robot data and media
-artifacts/
+/artifacts/
 datasets/
 runs/
 exports/
