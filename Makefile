@@ -65,8 +65,7 @@ test-motion-smoke:
 		--config /tmp/motion-reliability.json
 
 migration-check:
-	@echo "Migration checks are not implemented yet." >&2
-	@exit 1
+	$(UV) run pytest tests/test_migrations.py -q
 
 compose-build:
 	docker compose build
