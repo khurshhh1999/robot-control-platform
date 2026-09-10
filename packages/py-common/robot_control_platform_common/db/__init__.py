@@ -20,6 +20,20 @@ from robot_control_platform_common.db.models import (
     Trial,
     TrialEvent,
 )
+from robot_control_platform_common.db.repositories import (
+    claim_next_run,
+    create_trial_if_absent,
+    derive_experiment_status,
+    heartbeat_run,
+    requeue_expired_leases,
+    sync_experiment_status,
+)
+from robot_control_platform_common.db.repositories.exceptions import (
+    EntityNotFoundError,
+    InvalidLeaseStateError,
+    LeaseOwnershipError,
+    RepositoryError,
+)
 from robot_control_platform_common.db.session import (
     create_engine,
     create_session_factory,
@@ -39,17 +53,27 @@ __all__ = [
     "Annotation",
     "Artifact",
     "Base",
+    "EntityNotFoundError",
     "Experiment",
     "ExperimentPolicy",
+    "InvalidLeaseStateError",
+    "LeaseOwnershipError",
     "PolicyVersion",
+    "RepositoryError",
     "Run",
     "Scenario",
     "ScenarioSet",
     "Trial",
     "TrialEvent",
+    "claim_next_run",
     "create_engine",
     "create_session_factory",
+    "create_trial_if_absent",
     "database_url_from_dsn",
+    "derive_experiment_status",
+    "heartbeat_run",
     "metadata",
+    "requeue_expired_leases",
     "session_scope",
+    "sync_experiment_status",
 ]
