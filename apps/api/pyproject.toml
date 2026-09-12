@@ -5,7 +5,9 @@ description = "HTTP API package for the robot control platform."
 requires-python = ">=3.12,<3.13"
 license = { text = "Apache-2.0" }
 dependencies = [
+    "fastapi>=0.115,<1",
     "robot-control-platform-common",
+    "uvicorn[standard]>=0.34,<1",
 ]
 
 [build-system]
