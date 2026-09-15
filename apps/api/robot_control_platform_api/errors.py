@@ -16,9 +16,12 @@ from robot_control_platform_common.artifacts.base import (
 from robot_control_platform_common.db.repositories.exceptions import (
     DuplicateEntityError,
     EntityNotFoundError,
+    IdempotencyConflictError,
     InvalidLeaseStateError,
     LeaseOwnershipError,
+    OptimisticConcurrencyError,
     RepositoryError,
+    RunAlreadyTerminalError,
 )
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
@@ -178,6 +181,24 @@ def map_exception(exc: BaseException) -> ProblemDetail:
             status=409,
             detail="The resource already exists",
         )
+    if isinstance(exc, IdempotencyConflictError):
+        return build_problem(
+            code="IDEMPOTENCY_CONFLICT",
+            status=409,
+            detail="Idempotency key reused with a different request body",
+        )
+    if isinstance(exc, RunAlreadyTerminalError):
+        return build_problem(
+            code="RUN_ALREADY_TERMINAL",
+            status=409,
+            detail="The run is already terminal",
+        )
+    if isinstance(exc, OptimisticConcurrencyError):
+        return build_problem(
+            code="CONFLICT",
+            status=409,
+            detail="The resource was modified by another request",
+        )
     if isinstance(exc, (InvalidLeaseStateError, LeaseOwnershipError)):
         return build_problem(
             code="INVALID_STATE_TRANSITION",
@@ -271,6 +292,9 @@ DOMAIN_EXCEPTION_TYPES: Final[tuple[type[Exception], ...]] = (
     ApiError,
     EntityNotFoundError,
     DuplicateEntityError,
+    IdempotencyConflictError,
+    RunAlreadyTerminalError,
+    OptimisticConcurrencyError,
     InvalidLeaseStateError,
     LeaseOwnershipError,
     RepositoryError,

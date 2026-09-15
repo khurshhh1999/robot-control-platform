@@ -36,7 +36,16 @@ from robot_control_platform_api.errors import (
     validation_error_handler,
 )
 from robot_control_platform_api.middleware import RequestIdMiddleware
-from robot_control_platform_api.routes import health_router
+from robot_control_platform_api.routes import (
+    annotations_router,
+    artifacts_router,
+    experiments_router,
+    health_router,
+    policies_router,
+    runs_router,
+    scenario_sets_router,
+    trials_router,
+)
 
 # Explicit browser origins for the Compose-published web UI. Never combine a
 # wildcard origin list with credentialed CORS.
@@ -126,6 +135,13 @@ def create_app(
     # Exception is handled by ServerErrorMiddleware and re-raised for servers/tests.
     app.add_exception_handler(Exception, unhandled_error_handler)
     app.include_router(health_router)
+    app.include_router(policies_router)
+    app.include_router(scenario_sets_router)
+    app.include_router(experiments_router)
+    app.include_router(runs_router)
+    app.include_router(trials_router)
+    app.include_router(artifacts_router)
+    app.include_router(annotations_router)
 
     if settings.env is RuntimeEnv.TEST:
 

@@ -61,6 +61,10 @@ async def get_db_session(request: Request) -> AsyncIterator[AsyncSession]:
     session = runtime.session_factory()
     try:
         yield session
+        await session.commit()
+    except Exception:
+        await session.rollback()
+        raise
     finally:
         await session.close()
 
