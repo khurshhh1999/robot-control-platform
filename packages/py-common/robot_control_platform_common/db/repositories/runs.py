@@ -17,8 +17,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from robot_control_platform_common.db.models import Run
 from robot_control_platform_common.db.repositories.exceptions import (
     EntityNotFoundError,
+    IdempotencyConflictError,
     InvalidLeaseStateError,
     LeaseOwnershipError,
+    RunAlreadyTerminalError,
 )
 from robot_control_platform_common.ids import new_id
 from robot_control_platform_common.time import utc_now
@@ -27,6 +29,7 @@ _CLAIMABLE_STATUSES = frozenset({"queued"})
 _LEASED_STATUSES = frozenset({"claimed", "running"})
 _HEARTBEAT_STATUSES = frozenset({"claimed", "running", "cancelling"})
 _TERMINAL_RUN_STATUSES = frozenset({"completed", "completed_with_errors", "cancelled", "failed"})
+_SHA256_HEX_LENGTH = 64
 
 
 async def add_run(session: AsyncSession, run: Run) -> Run:
@@ -47,20 +50,37 @@ async def get_run(session: AsyncSession, run_id: UUID) -> Run:
     return run
 
 
+def _validate_fingerprint(request_fingerprint: str) -> str:
+    fingerprint = request_fingerprint.lower()
+    if len(fingerprint) != _SHA256_HEX_LENGTH or any(
+        ch not in "0123456789abcdef" for ch in fingerprint
+    ):
+        msg = "request_fingerprint must be lowercase hexadecimal of length 64"
+        raise ValueError(msg)
+    return fingerprint
+
+
 async def create_queued_run(
     session: AsyncSession,
     *,
     experiment_id: UUID,
     idempotency_key: str,
+    request_fingerprint: str,
     created_at: datetime | None = None,
 ) -> Run:
-    """Insert a queued run for an experiment."""
+    """Insert a queued run for an experiment with a request fingerprint."""
+
+    fingerprint = _validate_fingerprint(request_fingerprint)
+    if not idempotency_key.strip():
+        msg = "idempotency_key must be non-empty"
+        raise ValueError(msg)
 
     run = Run(
         id=new_id(),
         experiment_id=experiment_id,
         status="queued",
         idempotency_key=idempotency_key,
+        request_fingerprint=fingerprint,
         lease_owner=None,
         lease_expires_at=None,
         attempt=0,
@@ -70,6 +90,78 @@ async def create_queued_run(
         completed_at=None,
     )
     return await add_run(session, run)
+
+
+async def create_or_get_queued_run(
+    session: AsyncSession,
+    *,
+    experiment_id: UUID,
+    idempotency_key: str,
+    request_fingerprint: str,
+    created_at: datetime | None = None,
+) -> tuple[Run, bool]:
+    """Create a queued run or return the existing idempotent match.
+
+    Returns ``(run, created)``. Reusing the same key with a different request
+    fingerprint raises ``IdempotencyConflictError``.
+    """
+
+    fingerprint = _validate_fingerprint(request_fingerprint)
+    existing = await get_run_by_idempotency_key(
+        session,
+        experiment_id=experiment_id,
+        idempotency_key=idempotency_key,
+    )
+    if existing is not None:
+        if existing.request_fingerprint != fingerprint:
+            msg = "idempotency key reused with a different request body"
+            raise IdempotencyConflictError(msg)
+        return existing, False
+
+    run = await create_queued_run(
+        session,
+        experiment_id=experiment_id,
+        idempotency_key=idempotency_key,
+        request_fingerprint=fingerprint,
+        created_at=created_at,
+    )
+    return run, True
+
+
+async def request_run_cancellation(session: AsyncSession, run_id: UUID) -> Run:
+    """Request cancellation for a nonterminal run.
+
+    Queued runs transition directly to ``cancelled``. Claimed or running runs
+    transition to ``cancelling`` for the worker to observe. Already-cancelling
+    runs are returned unchanged. Terminal runs raise ``RunAlreadyTerminalError``.
+    """
+
+    result = await session.execute(select(Run).where(Run.id == run_id).with_for_update())
+    run = result.scalar_one_or_none()
+    if run is None:
+        msg = f"run {run_id} not found"
+        raise EntityNotFoundError(msg)
+
+    if run.status in _TERMINAL_RUN_STATUSES:
+        msg = f"run {run_id} is already terminal"
+        raise RunAlreadyTerminalError(msg)
+    if run.status == "cancelling":
+        return run
+    if run.status in {"queued", "lease_expired"}:
+        moment = utc_now()
+        run.status = "cancelled"
+        run.lease_owner = None
+        run.lease_expires_at = None
+        run.completed_at = moment
+        await session.flush()
+        return run
+    if run.status in {"claimed", "running"}:
+        run.status = "cancelling"
+        await session.flush()
+        return run
+
+    msg = f"run {run_id} cannot be cancelled from status {run.status}"
+    raise InvalidLeaseStateError(msg)
 
 
 async def requeue_expired_leases(

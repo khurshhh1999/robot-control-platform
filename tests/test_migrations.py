@@ -277,7 +277,7 @@ def test_empty_upgrade_introspection_downgrade_reupgrade(
             version = connection.execute(
                 text("SELECT version_num FROM alembic_version")
             ).scalar_one()
-        assert version == "20260907_0001"
+        assert version == "20260915_0002"
     finally:
         engine.dispose()
 
@@ -287,3 +287,18 @@ def test_empty_upgrade_introspection_downgrade_reupgrade(
 
     command.upgrade(alembic_env, "head")
     _assert_schema(postgres_url)
+
+
+def test_run_request_fingerprint_column_present(
+    alembic_env: Config,
+    postgres_url: str,
+) -> None:
+    command.upgrade(alembic_env, "head")
+    engine = create_engine(postgres_url)
+    try:
+        inspector = inspect(engine)
+        columns = {column["name"] for column in inspector.get_columns("runs")}
+        assert "request_fingerprint" in columns
+    finally:
+        engine.dispose()
+    command.downgrade(alembic_env, "base")

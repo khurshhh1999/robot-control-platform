@@ -60,6 +60,7 @@ POSTGRES_IMAGE = (
     "postgres:16-bookworm@sha256:60f4761b9035e0b8d5218f701a8c3382f641bf12b1604822574cf5be3baeb537"
 )
 CHECKSUM = "a" * 64
+FINGERPRINT = "b" * 64
 MAX_ATTEMPTS = 3
 LEASE_SECONDS = 30
 
@@ -271,6 +272,7 @@ async def test_two_workers_cannot_claim_same_run(
             session,
             experiment_id=experiment.id,
             idempotency_key="two-worker-key",
+            request_fingerprint=FINGERPRINT,
         )
 
     async def claim(worker_id: str) -> str | None:
@@ -307,6 +309,7 @@ async def test_expired_lease_is_reclaimed_without_duplicating_completed_trials(
             session,
             experiment_id=experiment.id,
             idempotency_key="reclaim-key",
+            request_fingerprint=FINGERPRINT,
         )
         claimed = await runs.claim_next_run(
             session,
@@ -447,6 +450,7 @@ async def test_heartbeat_requires_owner_and_nonterminal_lease(
             session,
             experiment_id=experiment.id,
             idempotency_key="heartbeat-key",
+            request_fingerprint=FINGERPRINT,
         )
         claimed = await runs.claim_next_run(
             session,
@@ -500,6 +504,7 @@ async def test_requeue_fails_when_attempt_limit_reached(
             session,
             experiment_id=experiment.id,
             idempotency_key="attempt-limit-key",
+            request_fingerprint=FINGERPRINT,
         )
         claimed = await runs.claim_next_run(
             session,
@@ -550,6 +555,7 @@ async def test_sync_experiment_status_from_runs_and_trials(
             session,
             experiment_id=experiment.id,
             idempotency_key="status-key",
+            request_fingerprint=FINGERPRINT,
         )
         synced = await experiments.sync_experiment_status(session, experiment.id)
         assert synced.status == "queued"
@@ -597,6 +603,7 @@ def test_derive_experiment_status_pure_rules() -> None:
         experiment_id=experiment_id,
         status="queued",
         idempotency_key="a",
+        request_fingerprint=FINGERPRINT,
         lease_owner=None,
         lease_expires_at=None,
         attempt=0,
@@ -612,6 +619,7 @@ def test_derive_experiment_status_pure_rules() -> None:
         experiment_id=experiment_id,
         status="running",
         idempotency_key="b",
+        request_fingerprint=FINGERPRINT,
         lease_owner="w",
         lease_expires_at=now + timedelta(seconds=10),
         attempt=1,
@@ -627,6 +635,7 @@ def test_derive_experiment_status_pure_rules() -> None:
         experiment_id=experiment_id,
         status="completed",
         idempotency_key="c",
+        request_fingerprint=FINGERPRINT,
         lease_owner=None,
         lease_expires_at=None,
         attempt=1,
@@ -671,6 +680,7 @@ async def test_trial_events_remain_after_reclaim(
             session,
             experiment_id=experiment.id,
             idempotency_key="event-preserve-key",
+            request_fingerprint=FINGERPRINT,
         )
         claimed = await runs.claim_next_run(
             session,

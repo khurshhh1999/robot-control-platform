@@ -2,19 +2,49 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import Select, exists, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from robot_control_platform_common.db.models import Trial
+from robot_control_platform_common.db.models import Annotation, Scenario, Trial
 from robot_control_platform_common.db.repositories.exceptions import EntityNotFoundError
 from robot_control_platform_common.ids import new_id
 from robot_control_platform_common.time import utc_now
+
+DEFAULT_PAGE_SIZE = 25
+MAX_PAGE_SIZE = 100
+
+
+@dataclass(frozen=True, slots=True)
+class TrialListFilters:
+    """Typed filters for trial collection queries."""
+
+    experiment_id: UUID | None = None
+    policy_version_id: UUID | None = None
+    terminal_outcome: str | None = None
+    object_name: str | None = None
+    reviewed: bool | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class TrialPage:
+    """A page of trials with opaque cursor pagination metadata."""
+
+    items: list[Trial]
+    next_sort_values: tuple[str, ...] | None
+
+
+def _clamp_page_size(limit: int) -> int:
+    if limit < 1:
+        msg = "limit must be at least 1"
+        raise ValueError(msg)
+    return min(limit, MAX_PAGE_SIZE)
 
 
 async def get_trial(session: AsyncSession, trial_id: UUID) -> Trial:
@@ -101,6 +131,53 @@ async def create_trial_if_absent(
         msg = "trial unique conflict resolved without locating existing row"
         raise RuntimeError(msg)
     return existing, False
+
+
+def _apply_trial_filters(
+    stmt: Select[tuple[Trial]],
+    filters: TrialListFilters,
+) -> Select[tuple[Trial]]:
+    if filters.experiment_id is not None:
+        stmt = stmt.where(Trial.experiment_id == filters.experiment_id)
+    if filters.policy_version_id is not None:
+        stmt = stmt.where(Trial.policy_version_id == filters.policy_version_id)
+    if filters.terminal_outcome is not None:
+        stmt = stmt.where(Trial.terminal_outcome == filters.terminal_outcome)
+    if filters.object_name is not None:
+        stmt = stmt.join(Scenario, Scenario.id == Trial.scenario_id).where(
+            Scenario.object_name == filters.object_name
+        )
+    if filters.reviewed is True:
+        stmt = stmt.where(exists().where(Annotation.trial_id == Trial.id))
+    elif filters.reviewed is False:
+        stmt = stmt.where(~exists().where(Annotation.trial_id == Trial.id))
+    return stmt
+
+
+async def list_trials(
+    session: AsyncSession,
+    *,
+    filters: TrialListFilters | None = None,
+    limit: int = DEFAULT_PAGE_SIZE,
+    after_id: UUID | None = None,
+) -> TrialPage:
+    """List trials ordered by UUIDv7 id with optional filters and cursor."""
+
+    page_size = _clamp_page_size(limit)
+    active_filters = filters or TrialListFilters()
+    stmt = select(Trial)
+    stmt = _apply_trial_filters(stmt, active_filters)
+    if after_id is not None:
+        stmt = stmt.where(Trial.id > after_id)
+    stmt = stmt.order_by(Trial.id).limit(page_size + 1)
+    result = await session.execute(stmt)
+    rows = list(result.scalars().all())
+    has_more = len(rows) > page_size
+    items = rows[:page_size]
+    next_sort: tuple[str, ...] | None = None
+    if has_more and items:
+        next_sort = (str(items[-1].id),)
+    return TrialPage(items=items, next_sort_values=next_sort)
 
 
 async def mark_trial_running(

@@ -21,3 +21,15 @@ class InvalidLeaseStateError(RepositoryError):
 
 class DuplicateEntityError(RepositoryError):
     """Raised when a unique constraint prevents creating a new entity."""
+
+
+class IdempotencyConflictError(RepositoryError):
+    """Raised when an idempotency key is reused with a different request body."""
+
+
+class RunAlreadyTerminalError(RepositoryError):
+    """Raised when a terminal run cannot accept further lifecycle mutations."""
+
+
+class OptimisticConcurrencyError(RepositoryError):
+    """Raised when an update races against a newer persisted revision."""

@@ -259,6 +259,10 @@ class Run(Base):
             name="status",
         ),
         CheckConstraint("attempt >= 0", name="attempt_nonnegative"),
+        CheckConstraint(
+            f"char_length(request_fingerprint) = {SHA256_HEX_LENGTH}",
+            name="request_fingerprint_length",
+        ),
         UniqueConstraint(
             "experiment_id",
             "idempotency_key",
@@ -276,6 +280,7 @@ class Run(Base):
     )
     status: Mapped[str] = mapped_column(Text, nullable=False)
     idempotency_key: Mapped[str] = mapped_column(Text, nullable=False)
+    request_fingerprint: Mapped[str] = mapped_column(String(SHA256_HEX_LENGTH), nullable=False)
     lease_owner: Mapped[str | None] = mapped_column(Text, nullable=True)
     lease_expires_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True),

@@ -90,6 +90,29 @@ async def get_experiment(session: AsyncSession, experiment_id: UUID) -> Experime
     return experiment
 
 
+async def list_experiments(session: AsyncSession) -> list[Experiment]:
+    """Return experiments ordered by creation time descending then id."""
+
+    result = await session.execute(
+        select(Experiment).order_by(Experiment.created_at.desc(), Experiment.id.desc())
+    )
+    return list(result.scalars().all())
+
+
+async def list_policies_for_experiment(
+    session: AsyncSession,
+    experiment_id: UUID,
+) -> list[ExperimentPolicy]:
+    """Return ordered policy memberships for an experiment."""
+
+    result = await session.execute(
+        select(ExperimentPolicy)
+        .where(ExperimentPolicy.experiment_id == experiment_id)
+        .order_by(ExperimentPolicy.execution_order)
+    )
+    return list(result.scalars().all())
+
+
 async def list_runs_for_experiment(
     session: AsyncSession,
     experiment_id: UUID,
