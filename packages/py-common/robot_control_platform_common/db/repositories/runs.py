@@ -293,6 +293,50 @@ async def heartbeat_run(
     return run
 
 
+async def release_owned_lease(
+    session: AsyncSession,
+    *,
+    run_id: UUID,
+    worker_id: str,
+    now: datetime | None = None,
+) -> Run:
+    """Release a lease owned by ``worker_id`` without deleting trial evidence.
+
+    ``cancelling`` runs become ``cancelled``. ``claimed`` and ``running`` runs
+    return to ``queued`` so another worker can reclaim them. Attempt count and
+    completed trials are left unchanged. Terminal runs are returned as-is.
+    """
+
+    if not worker_id.strip():
+        msg = "worker_id must be non-empty"
+        raise ValueError(msg)
+
+    moment = now or utc_now()
+    result = await session.execute(select(Run).where(Run.id == run_id).with_for_update())
+    run = result.scalar_one_or_none()
+    if run is None:
+        msg = f"run {run_id} not found"
+        raise EntityNotFoundError(msg)
+    if run.status in _TERMINAL_RUN_STATUSES:
+        return run
+    if run.lease_owner != worker_id:
+        msg = f"worker {worker_id!r} does not own the lease for run {run_id}"
+        raise LeaseOwnershipError(msg)
+
+    run.lease_owner = None
+    run.lease_expires_at = None
+    if run.status == "cancelling":
+        run.status = "cancelled"
+        run.completed_at = moment
+    elif run.status in _LEASED_STATUSES:
+        run.status = "queued"
+    else:
+        msg = f"run {run_id} cannot release a lease from status {run.status}"
+        raise InvalidLeaseStateError(msg)
+    await session.flush()
+    return run
+
+
 async def mark_run_running(session: AsyncSession, run_id: UUID) -> Run:
     """Transition a claimed run to ``running``."""
 

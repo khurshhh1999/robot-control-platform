@@ -12,8 +12,8 @@ from .exceptions import (
     RunAlreadyTerminalError,
 )
 from .experiments import derive_experiment_status, sync_experiment_status
-from .runs import claim_next_run, heartbeat_run, requeue_expired_leases
-from .trials import create_trial_if_absent
+from .runs import claim_next_run, heartbeat_run, release_owned_lease, requeue_expired_leases
+from .trials import create_trial_if_absent, mark_trial_cancelled
 
 __all__ = [
     "DuplicateEntityError",
@@ -32,7 +32,9 @@ __all__ = [
     "events",
     "experiments",
     "heartbeat_run",
+    "mark_trial_cancelled",
     "policies",
+    "release_owned_lease",
     "requeue_expired_leases",
     "runs",
     "scenarios",
