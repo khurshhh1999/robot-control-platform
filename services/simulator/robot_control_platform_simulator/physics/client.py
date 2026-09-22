@@ -563,19 +563,99 @@ class PhysicsClient:
         )
         if body_id < 0:
             raise SimulationError("failed to create a dynamic parcel body")
+        self._set_parcel_dynamics(
+            body_id,
+            lateral_friction=friction,
+            spinning_friction=spinning,
+            rolling_friction=rolling,
+        )
+        return body_id
+
+    def create_dynamic_cylinder(
+        self,
+        *,
+        radius_meters: float,
+        height_meters: float,
+        pose: Pose,
+        mass_kilograms: float,
+        rgba: tuple[float, float, float, float],
+        lateral_friction: float,
+        spinning_friction: float,
+        rolling_friction: float,
+    ) -> int:
+        """Create a dynamic cylinder. ``height_meters`` is the full height."""
+
+        radius = require_positive("radius_meters", require_finite("radius_meters", radius_meters))
+        height = require_positive("height_meters", require_finite("height_meters", height_meters))
+        mass = require_positive("mass_kilograms", require_finite("mass_kilograms", mass_kilograms))
+        friction = require_positive(
+            "lateral_friction", require_finite("lateral_friction", lateral_friction)
+        )
+        spinning = require_nonnegative(
+            "spinning_friction", require_finite("spinning_friction", spinning_friction)
+        )
+        rolling = require_nonnegative(
+            "rolling_friction", require_finite("rolling_friction", rolling_friction)
+        )
+        bullet = _pybullet()
+        client_id = self.physics_client_id
+        collision_id = int(
+            bullet.createCollisionShape(
+                bullet.GEOM_CYLINDER,
+                radius=radius,
+                height=height,
+                physicsClientId=client_id,
+            )
+        )
+        visual_id = int(
+            bullet.createVisualShape(
+                bullet.GEOM_CYLINDER,
+                radius=radius,
+                length=height,
+                rgbaColor=list(rgba),
+                physicsClientId=client_id,
+            )
+        )
+        body_id = int(
+            bullet.createMultiBody(
+                baseMass=mass,
+                baseCollisionShapeIndex=collision_id,
+                baseVisualShapeIndex=visual_id,
+                basePosition=list(pose.position_meters.to_checksum_payload()),
+                baseOrientation=list(pose.orientation_xyzw.to_checksum_payload()),
+                physicsClientId=client_id,
+            )
+        )
+        if body_id < 0:
+            raise SimulationError("failed to create a dynamic parcel body")
+        self._set_parcel_dynamics(
+            body_id,
+            lateral_friction=friction,
+            spinning_friction=spinning,
+            rolling_friction=rolling,
+        )
+        return body_id
+
+    def _set_parcel_dynamics(
+        self,
+        body_id: int,
+        *,
+        lateral_friction: float,
+        spinning_friction: float,
+        rolling_friction: float,
+    ) -> None:
         try:
-            bullet.changeDynamics(
+            _pybullet().changeDynamics(
                 body_id,
                 -1,
-                lateralFriction=friction,
-                spinningFriction=spinning,
-                rollingFriction=rolling,
+                lateralFriction=lateral_friction,
+                spinningFriction=spinning_friction,
+                rollingFriction=rolling_friction,
                 restitution=0.0,
-                physicsClientId=client_id,
+                physicsClientId=self.physics_client_id,
             )
         except Exception as exc:
             raise SimulationError("failed to set parcel dynamics") from exc
-        return body_id
 
     def create_static_visual_box(
         self, half_extents_meters: Vector3, pose: Pose, rgba: tuple[float, float, float, float]
