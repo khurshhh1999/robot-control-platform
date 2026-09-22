@@ -224,6 +224,34 @@ async def mark_trial_completed(
     return trial
 
 
+async def mark_trial_cancelled(
+    session: AsyncSession,
+    trial_id: UUID,
+    *,
+    completed_at: datetime | None = None,
+) -> Trial:
+    """Cancel a pending or running trial without assigning a task outcome.
+
+    Completed and failed trials are left unchanged so recorded evidence stays
+    in place. A second cancel of an already-cancelled trial is a no-op.
+    """
+
+    trial = await get_trial(session, trial_id)
+    if trial.status in {"completed", "failed"}:
+        return trial
+    if trial.status == "cancelled":
+        return trial
+    if trial.status not in {"pending", "running"}:
+        msg = f"trial {trial_id} cannot be cancelled from status {trial.status}"
+        raise ValueError(msg)
+    trial.status = "cancelled"
+    trial.terminal_outcome = None
+    trial.success = None
+    trial.completed_at = completed_at or utc_now()
+    await session.flush()
+    return trial
+
+
 async def mark_trial_failed(
     session: AsyncSession,
     *,

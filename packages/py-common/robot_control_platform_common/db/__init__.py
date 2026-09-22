@@ -25,6 +25,8 @@ from robot_control_platform_common.db.repositories import (
     create_trial_if_absent,
     derive_experiment_status,
     heartbeat_run,
+    mark_trial_cancelled,
+    release_owned_lease,
     requeue_expired_leases,
     sync_experiment_status,
 )
@@ -72,7 +74,9 @@ __all__ = [
     "database_url_from_dsn",
     "derive_experiment_status",
     "heartbeat_run",
+    "mark_trial_cancelled",
     "metadata",
+    "release_owned_lease",
     "requeue_expired_leases",
     "session_scope",
     "sync_experiment_status",

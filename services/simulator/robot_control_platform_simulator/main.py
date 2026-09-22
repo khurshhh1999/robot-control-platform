@@ -1,19 +1,30 @@
-"""Placeholder simulator process for the four-service Compose shell."""
+"""Simulator process entrypoint."""
 
 from __future__ import annotations
 
-import signal
+import asyncio
 import sys
 import threading
 
+from robot_control_platform_common.artifacts.base import ArtifactStoreError
+from robot_control_platform_common.artifacts.filesystem import FilesystemArtifactStore
 from robot_control_platform_common.config import ConfigurationError, load_settings
+from robot_control_platform_common.db.session import create_engine, create_session_factory
 from robot_control_platform_common.logging import configure_logging, get_logger
 
-from robot_control_platform_simulator.worker import run_placeholder
+from robot_control_platform_simulator.trial_execution import PhysicsTrialExecutor
+from robot_control_platform_simulator.worker import (
+    HEARTBEAT_PATH,
+    DatabaseUnavailable,
+    SimulatorWorker,
+    clear_liveness,
+    install_worker_signals,
+    write_liveness,
+)
 
 
 def main() -> None:
-    """Load settings, prove the artifact root is writable, then idle until SIGTERM."""
+    """Validate configuration, then run the simulator worker until signaled."""
 
     try:
         settings = load_settings()
@@ -23,22 +34,35 @@ def main() -> None:
 
     configure_logging("simulator", settings.log_level.value)
     logger = get_logger("simulator")
-    try:
-        settings.artifact_root.mkdir(parents=True, exist_ok=True)
-        probe = settings.artifact_root / ".compose-shell-writable"
-        probe.write_text("ok\n", encoding="utf-8")
-        probe.unlink()
-    except OSError as exc:
-        logger.error("artifact_root_not_writable")
-        raise SystemExit(1) from exc
-
-    logger.info("simulator_placeholder_started")
     stop_event = threading.Event()
+    install_worker_signals(stop_event)
+    write_liveness(HEARTBEAT_PATH)
+    try:
+        store = FilesystemArtifactStore(settings.artifact_root)
+    except (ArtifactStoreError, OSError):
+        logger.error("artifact_store_unavailable")
+        clear_liveness(HEARTBEAT_PATH)
+        raise SystemExit(1) from None
 
-    def _stop(_signum: int, _frame: object | None) -> None:
-        logger.info("simulator_placeholder_stopping")
-        stop_event.set()
+    engine = create_engine(settings)
+    worker = SimulatorWorker(
+        settings=settings,
+        session_factory=create_session_factory(engine),
+        store=store,
+        executor=PhysicsTrialExecutor(gui=settings.simulation_gui),
+        stop_event=stop_event,
+        liveness_path=HEARTBEAT_PATH,
+    )
 
-    signal.signal(signal.SIGTERM, _stop)
-    signal.signal(signal.SIGINT, _stop)
-    run_placeholder(stop_event)
+    async def _run() -> None:
+        try:
+            await worker.run()
+        finally:
+            clear_liveness(HEARTBEAT_PATH)
+            await engine.dispose()
+
+    try:
+        asyncio.run(_run())
+    except DatabaseUnavailable:
+        logger.error("database_unavailable")
+        raise SystemExit(1) from None
