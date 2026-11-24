@@ -3,10 +3,16 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
+  "exports": {
+    ".": "./src/generated.ts"
+  },
   "scripts": {
+    "generate": "openapi-typescript openapi.json -o src/generated.ts",
+    "check": "node scripts/check-generated.mjs",
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "devDependencies": {
+    "openapi-typescript": "7.13.0",
     "typescript": "5.9.2"
   }
 }

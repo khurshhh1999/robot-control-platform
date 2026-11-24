@@ -120,8 +120,8 @@ services:
 
   web:
     build:
-      context: ./apps/web
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: apps/web/Dockerfile
     init: true
     read_only: true
     user: "101:101"
