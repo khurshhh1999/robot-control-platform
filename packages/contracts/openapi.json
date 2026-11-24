@@ -1,0 +1,2186 @@
+{
+  "components": {
+    "schemas": {
+      "AnnotationCreate": {
+        "additionalProperties": false,
+        "description": "Create a reviewer annotation on a trial.",
+        "properties": {
+          "label": {
+            "examples": [
+              "needs_review"
+            ],
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Label",
+            "type": "string"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "Gripper closed early"
+            ],
+            "title": "Note"
+          },
+          "reviewer": {
+            "examples": [
+              "reviewer"
+            ],
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Reviewer",
+            "type": "string"
+          }
+        },
+        "required": [
+          "label",
+          "reviewer"
+        ],
+        "title": "AnnotationCreate",
+        "type": "object"
+      },
+      "AnnotationResponse": {
+        "additionalProperties": false,
+        "description": "Reviewer annotation with revision history counter.",
+        "properties": {
+          "created_at": {
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "examples": [
+              "0193f1a2-b3c4-7d8e-9f01-23456789abcd"
+            ],
+            "title": "Id",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "reviewer": {
+            "title": "Reviewer",
+            "type": "string"
+          },
+          "revision": {
+            "examples": [
+              1
+            ],
+            "title": "Revision",
+            "type": "integer"
+          },
+          "trial_id": {
+            "title": "Trial Id",
+            "type": "string"
+          },
+          "updated_at": {
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "trial_id",
+          "label",
+          "reviewer",
+          "created_at",
+          "updated_at",
+          "revision"
+        ],
+        "title": "AnnotationResponse",
+        "type": "object"
+      },
+      "AnnotationUpdate": {
+        "additionalProperties": false,
+        "description": "Update an annotation with optimistic concurrency.",
+        "properties": {
+          "label": {
+            "examples": [
+              "confirmed_collision"
+            ],
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Label",
+            "type": "string"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "Updated note"
+            ],
+            "title": "Note"
+          },
+          "revision": {
+            "description": "Current revision that must match the stored value.",
+            "examples": [
+              1
+            ],
+            "minimum": 1.0,
+            "title": "Revision",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "label",
+          "revision"
+        ],
+        "title": "AnnotationUpdate",
+        "type": "object"
+      },
+      "ArtifactListResponse": {
+        "additionalProperties": false,
+        "description": "Artifacts belonging to a trial.",
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ArtifactResponse"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "ArtifactListResponse",
+        "type": "object"
+      },
+      "ArtifactResponse": {
+        "additionalProperties": false,
+        "description": "Checksummed artifact metadata. Bytes are served separately.",
+        "properties": {
+          "byte_size": {
+            "examples": [
+              1024
+            ],
+            "title": "Byte Size",
+            "type": "integer"
+          },
+          "created_at": {
+            "title": "Created At",
+            "type": "string"
+          },
+          "height_px": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              480
+            ],
+            "title": "Height Px"
+          },
+          "id": {
+            "examples": [
+              "0193f1a2-b3c4-7d8e-9f01-23456789abcd"
+            ],
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "examples": [
+              "initial_rgb"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "media_type": {
+            "examples": [
+              "image/png"
+            ],
+            "title": "Media Type",
+            "type": "string"
+          },
+          "sha256": {
+            "examples": [
+              "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            ],
+            "title": "Sha256",
+            "type": "string"
+          },
+          "trial_id": {
+            "title": "Trial Id",
+            "type": "string"
+          },
+          "width_px": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              640
+            ],
+            "title": "Width Px"
+          }
+        },
+        "required": [
+          "id",
+          "trial_id",
+          "kind",
+          "media_type",
+          "byte_size",
+          "sha256",
+          "created_at"
+        ],
+        "title": "ArtifactResponse",
+        "type": "object"
+      },
+      "ExperimentCreate": {
+        "additionalProperties": false,
+        "description": "Create an experiment from an existing scenario set and policies.",
+        "properties": {
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "Neutral smoke evaluation"
+            ],
+            "title": "Description"
+          },
+          "name": {
+            "examples": [
+              "demo-experiment"
+            ],
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "policy_version_ids": {
+            "examples": [
+              [
+                "0193f1a2-b3c4-7d8e-9f01-23456789abce"
+              ]
+            ],
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Policy Version Ids",
+            "type": "array"
+          },
+          "requested_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "reviewer"
+            ],
+            "title": "Requested By"
+          },
+          "scenario_set_id": {
+            "examples": [
+              "0193f1a2-b3c4-7d8e-9f01-23456789abcd"
+            ],
+            "title": "Scenario Set Id",
+            "type": "string"
+          },
+          "simulator_image_digest": {
+            "examples": [
+              "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+            ],
+            "minLength": 1,
+            "title": "Simulator Image Digest",
+            "type": "string"
+          },
+          "source_revision": {
+            "examples": [
+              "deadbeef"
+            ],
+            "minLength": 1,
+            "title": "Source Revision",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "scenario_set_id",
+          "policy_version_ids",
+          "source_revision",
+          "simulator_image_digest"
+        ],
+        "title": "ExperimentCreate",
+        "type": "object"
+      },
+      "ExperimentListResponse": {
+        "additionalProperties": false,
+        "description": "Collection of experiments.",
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ExperimentResponse"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "ExperimentListResponse",
+        "type": "object"
+      },
+      "ExperimentPolicyResponse": {
+        "additionalProperties": false,
+        "description": "Ordered policy membership for an experiment.",
+        "properties": {
+          "execution_order": {
+            "title": "Execution Order",
+            "type": "integer"
+          },
+          "policy_version_id": {
+            "title": "Policy Version Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "policy_version_id",
+          "execution_order"
+        ],
+        "title": "ExperimentPolicyResponse",
+        "type": "object"
+      },
+      "ExperimentResponse": {
+        "additionalProperties": false,
+        "description": "Experiment lifecycle and membership summary.",
+        "properties": {
+          "completed_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "created_at": {
+            "title": "Created At",
+            "type": "string"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "id": {
+            "examples": [
+              "0193f1a2-b3c4-7d8e-9f01-23456789abcd"
+            ],
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "policies": {
+            "items": {
+              "$ref": "#/components/schemas/ExperimentPolicyResponse"
+            },
+            "title": "Policies",
+            "type": "array"
+          },
+          "requested_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requested By"
+          },
+          "scenario_set_id": {
+            "title": "Scenario Set Id",
+            "type": "string"
+          },
+          "simulator_image_digest": {
+            "title": "Simulator Image Digest",
+            "type": "string"
+          },
+          "source_revision": {
+            "title": "Source Revision",
+            "type": "string"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
+          },
+          "status": {
+            "examples": [
+              "draft"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "scenario_set_id",
+          "status",
+          "created_at",
+          "source_revision",
+          "simulator_image_digest",
+          "policies"
+        ],
+        "title": "ExperimentResponse",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "PageMeta": {
+        "additionalProperties": false,
+        "description": "Cursor pagination metadata.",
+        "properties": {
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Opaque cursor for the next page, or null when exhausted.",
+            "examples": [
+              null
+            ],
+            "title": "Next Cursor"
+          },
+          "page_size": {
+            "description": "Number of items requested for this page.",
+            "examples": [
+              25
+            ],
+            "title": "Page Size",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "page_size"
+        ],
+        "title": "PageMeta",
+        "type": "object"
+      },
+      "PolicyVersionListResponse": {
+        "additionalProperties": false,
+        "description": "Collection of policy versions.",
+        "properties": {
+          "items": {
+            "examples": [
+              []
+            ],
+            "items": {
+              "$ref": "#/components/schemas/PolicyVersionResponse"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "PolicyVersionListResponse",
+        "type": "object"
+      },
+      "PolicyVersionResponse": {
+        "additionalProperties": false,
+        "description": "Immutable allowlisted policy version.",
+        "properties": {
+          "config": {
+            "additionalProperties": true,
+            "examples": [
+              {
+                "approach_height_m": 0.15
+              }
+            ],
+            "title": "Config",
+            "type": "object"
+          },
+          "config_sha256": {
+            "examples": [
+              "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            ],
+            "title": "Config Sha256",
+            "type": "string"
+          },
+          "container_image_digest": {
+            "examples": [
+              "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+            ],
+            "title": "Container Image Digest",
+            "type": "string"
+          },
+          "created_at": {
+            "examples": [
+              "2026-01-15T12:00:00.000000Z"
+            ],
+            "title": "Created At",
+            "type": "string"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "Top-down fixed approach"
+            ],
+            "title": "Description"
+          },
+          "id": {
+            "examples": [
+              "0193f1a2-b3c4-7d8e-9f01-23456789abcd"
+            ],
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "examples": [
+              "fixed"
+            ],
+            "title": "Name",
+            "type": "string"
+          },
+          "semantic_version": {
+            "examples": [
+              "1.0.0"
+            ],
+            "title": "Semantic Version",
+            "type": "string"
+          },
+          "source_revision": {
+            "examples": [
+              "deadbeef"
+            ],
+            "title": "Source Revision",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "semantic_version",
+          "config",
+          "config_sha256",
+          "source_revision",
+          "container_image_digest",
+          "created_at"
+        ],
+        "title": "PolicyVersionResponse",
+        "type": "object"
+      },
+      "RunResponse": {
+        "additionalProperties": false,
+        "description": "Asynchronous experiment run with lease metadata.",
+        "properties": {
+          "attempt": {
+            "examples": [
+              0
+            ],
+            "title": "Attempt",
+            "type": "integer"
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "created_at": {
+            "title": "Created At",
+            "type": "string"
+          },
+          "error_detail": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Detail"
+          },
+          "experiment_id": {
+            "title": "Experiment Id",
+            "type": "string"
+          },
+          "id": {
+            "examples": [
+              "0193f1a2-b3c4-7d8e-9f01-23456789abcd"
+            ],
+            "title": "Id",
+            "type": "string"
+          },
+          "idempotency_key": {
+            "examples": [
+              "start-run-1"
+            ],
+            "title": "Idempotency Key",
+            "type": "string"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
+          },
+          "status": {
+            "examples": [
+              "queued"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "experiment_id",
+          "status",
+          "idempotency_key",
+          "attempt",
+          "created_at"
+        ],
+        "title": "RunResponse",
+        "type": "object"
+      },
+      "ScenarioCreate": {
+        "additionalProperties": false,
+        "description": "One scenario belonging to a newly created scenario set.",
+        "properties": {
+          "checksum": {
+            "examples": [
+              "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            ],
+            "title": "Checksum",
+            "type": "string"
+          },
+          "initial_pose": {
+            "additionalProperties": true,
+            "examples": [
+              {
+                "orientation_xyzw": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "position_m": [
+                  0.0,
+                  0.0,
+                  0.1
+                ]
+              }
+            ],
+            "title": "Initial Pose",
+            "type": "object"
+          },
+          "object_category": {
+            "examples": [
+              "parcel"
+            ],
+            "minLength": 1,
+            "title": "Object Category",
+            "type": "string"
+          },
+          "object_name": {
+            "examples": [
+              "cube"
+            ],
+            "minLength": 1,
+            "title": "Object Name",
+            "type": "string"
+          },
+          "ordinal": {
+            "examples": [
+              0
+            ],
+            "minimum": 0.0,
+            "title": "Ordinal",
+            "type": "integer"
+          },
+          "physical_properties": {
+            "additionalProperties": true,
+            "examples": [
+              {
+                "friction": 0.5,
+                "mass_kg": 0.2
+              }
+            ],
+            "title": "Physical Properties",
+            "type": "object"
+          },
+          "seed": {
+            "examples": [
+              1
+            ],
+            "minimum": 0.0,
+            "title": "Seed",
+            "type": "integer"
+          },
+          "target_bin": {
+            "examples": [
+              "bin_a"
+            ],
+            "minLength": 1,
+            "title": "Target Bin",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ordinal",
+          "seed",
+          "object_name",
+          "object_category",
+          "target_bin",
+          "initial_pose",
+          "physical_properties",
+          "checksum"
+        ],
+        "title": "ScenarioCreate",
+        "type": "object"
+      },
+      "ScenarioResponse": {
+        "additionalProperties": false,
+        "description": "Scenario metadata returned with a scenario set.",
+        "properties": {
+          "checksum": {
+            "title": "Checksum",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "initial_pose": {
+            "additionalProperties": true,
+            "title": "Initial Pose",
+            "type": "object"
+          },
+          "object_category": {
+            "title": "Object Category",
+            "type": "string"
+          },
+          "object_name": {
+            "title": "Object Name",
+            "type": "string"
+          },
+          "ordinal": {
+            "title": "Ordinal",
+            "type": "integer"
+          },
+          "physical_properties": {
+            "additionalProperties": true,
+            "title": "Physical Properties",
+            "type": "object"
+          },
+          "seed": {
+            "title": "Seed",
+            "type": "integer"
+          },
+          "target_bin": {
+            "title": "Target Bin",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "ordinal",
+          "seed",
+          "object_name",
+          "object_category",
+          "target_bin",
+          "initial_pose",
+          "physical_properties",
+          "checksum"
+        ],
+        "title": "ScenarioResponse",
+        "type": "object"
+      },
+      "ScenarioSetCreate": {
+        "additionalProperties": false,
+        "description": "Create a frozen scenario set with embedded scenarios.",
+        "properties": {
+          "checksum": {
+            "examples": [
+              "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            ],
+            "title": "Checksum",
+            "type": "string"
+          },
+          "generator_version": {
+            "examples": [
+              "1.0.0"
+            ],
+            "minLength": 1,
+            "title": "Generator Version",
+            "type": "string"
+          },
+          "name": {
+            "examples": [
+              "demo-set"
+            ],
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "scenarios": {
+            "items": {
+              "$ref": "#/components/schemas/ScenarioCreate"
+            },
+            "minItems": 1,
+            "title": "Scenarios",
+            "type": "array"
+          },
+          "scene_config": {
+            "additionalProperties": true,
+            "examples": [
+              {
+                "scene": "baseline"
+              }
+            ],
+            "title": "Scene Config",
+            "type": "object"
+          },
+          "seed_manifest": {
+            "additionalProperties": true,
+            "examples": [
+              {
+                "seeds": [
+                  1
+                ]
+              }
+            ],
+            "title": "Seed Manifest",
+            "type": "object"
+          }
+        },
+        "required": [
+          "name",
+          "generator_version",
+          "seed_manifest",
+          "scene_config",
+          "checksum",
+          "scenarios"
+        ],
+        "title": "ScenarioSetCreate",
+        "type": "object"
+      },
+      "ScenarioSetResponse": {
+        "additionalProperties": false,
+        "description": "Frozen scenario set with member scenarios.",
+        "properties": {
+          "checksum": {
+            "title": "Checksum",
+            "type": "string"
+          },
+          "generator_version": {
+            "examples": [
+              "1.0.0"
+            ],
+            "title": "Generator Version",
+            "type": "string"
+          },
+          "id": {
+            "examples": [
+              "0193f1a2-b3c4-7d8e-9f01-23456789abcd"
+            ],
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "examples": [
+              "demo-set"
+            ],
+            "title": "Name",
+            "type": "string"
+          },
+          "scenario_count": {
+            "examples": [
+              1
+            ],
+            "title": "Scenario Count",
+            "type": "integer"
+          },
+          "scenarios": {
+            "items": {
+              "$ref": "#/components/schemas/ScenarioResponse"
+            },
+            "title": "Scenarios",
+            "type": "array"
+          },
+          "scene_config": {
+            "additionalProperties": true,
+            "title": "Scene Config",
+            "type": "object"
+          },
+          "seed_manifest": {
+            "additionalProperties": true,
+            "title": "Seed Manifest",
+            "type": "object"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "generator_version",
+          "scenario_count",
+          "seed_manifest",
+          "scene_config",
+          "checksum",
+          "scenarios"
+        ],
+        "title": "ScenarioSetResponse",
+        "type": "object"
+      },
+      "TrialEventListResponse": {
+        "additionalProperties": false,
+        "description": "Cursor-paginated trial event collection.",
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/TrialEventResponse"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageMeta"
+          }
+        },
+        "required": [
+          "items",
+          "page"
+        ],
+        "title": "TrialEventListResponse",
+        "type": "object"
+      },
+      "TrialEventResponse": {
+        "additionalProperties": false,
+        "description": "Ordered trial event.",
+        "properties": {
+          "action": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Action"
+          },
+          "controller_state": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Controller State"
+          },
+          "event_type": {
+            "title": "Event Type",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "observation": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Observation"
+          },
+          "ordinal": {
+            "title": "Ordinal",
+            "type": "integer"
+          },
+          "timestamp_offset_seconds": {
+            "title": "Timestamp Offset Seconds",
+            "type": "string"
+          },
+          "trial_id": {
+            "title": "Trial Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "trial_id",
+          "ordinal",
+          "timestamp_offset_seconds",
+          "event_type"
+        ],
+        "title": "TrialEventResponse",
+        "type": "object"
+      },
+      "TrialListResponse": {
+        "additionalProperties": false,
+        "description": "Cursor-paginated trial collection.",
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/TrialResponse"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageMeta"
+          }
+        },
+        "required": [
+          "items",
+          "page"
+        ],
+        "title": "TrialListResponse",
+        "type": "object"
+      },
+      "TrialResponse": {
+        "additionalProperties": false,
+        "description": "Scenario-policy trial execution record.",
+        "properties": {
+          "action_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Action Count"
+          },
+          "collision_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Collision Count"
+          },
+          "collision_max_force_newtons": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Maximum collision force in newtons as a decimal string.",
+            "examples": [
+              "12.500000"
+            ],
+            "title": "Collision Max Force Newtons"
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "duration_seconds": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Trial duration in seconds as a decimal string.",
+            "examples": [
+              "4.250000"
+            ],
+            "title": "Duration Seconds"
+          },
+          "experiment_id": {
+            "title": "Experiment Id",
+            "type": "string"
+          },
+          "id": {
+            "examples": [
+              "0193f1a2-b3c4-7d8e-9f01-23456789abcd"
+            ],
+            "title": "Id",
+            "type": "string"
+          },
+          "policy_version_id": {
+            "title": "Policy Version Id",
+            "type": "string"
+          },
+          "scenario_id": {
+            "title": "Scenario Id",
+            "type": "string"
+          },
+          "simulator_metadata": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Simulator Metadata"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
+          },
+          "status": {
+            "examples": [
+              "completed"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "success": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              true
+            ],
+            "title": "Success"
+          },
+          "terminal_outcome": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "success"
+            ],
+            "title": "Terminal Outcome"
+          }
+        },
+        "required": [
+          "id",
+          "experiment_id",
+          "policy_version_id",
+          "scenario_id",
+          "status"
+        ],
+        "title": "TrialResponse",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "Robot Control Platform API",
+    "version": "0.1.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/v1/annotations/{annotation_id}": {
+      "patch": {
+        "operationId": "update_annotation_api_v1_annotations__annotation_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "annotation_id",
+            "required": true,
+            "schema": {
+              "title": "Annotation Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnnotationUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnnotationResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update Annotation",
+        "tags": [
+          "annotations"
+        ]
+      }
+    },
+    "/api/v1/artifacts/{artifact_id}/content": {
+      "get": {
+        "operationId": "get_artifact_content_api_v1_artifacts__artifact_id__content_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "artifact_id",
+            "required": true,
+            "schema": {
+              "title": "Artifact Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Artifact Content",
+        "tags": [
+          "artifacts"
+        ]
+      }
+    },
+    "/api/v1/experiments": {
+      "get": {
+        "operationId": "list_experiments_api_v1_experiments_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExperimentListResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Experiments",
+        "tags": [
+          "experiments"
+        ]
+      },
+      "post": {
+        "operationId": "create_experiment_api_v1_experiments_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExperimentCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExperimentResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Experiment",
+        "tags": [
+          "experiments"
+        ]
+      }
+    },
+    "/api/v1/experiments/{experiment_id}": {
+      "get": {
+        "operationId": "get_experiment_api_v1_experiments__experiment_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "experiment_id",
+            "required": true,
+            "schema": {
+              "title": "Experiment Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExperimentResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Experiment",
+        "tags": [
+          "experiments"
+        ]
+      }
+    },
+    "/api/v1/experiments/{experiment_id}/runs": {
+      "post": {
+        "operationId": "start_experiment_run_api_v1_experiments__experiment_id__runs_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "experiment_id",
+            "required": true,
+            "schema": {
+              "title": "Experiment Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Start Experiment Run",
+        "tags": [
+          "runs"
+        ]
+      }
+    },
+    "/api/v1/policies": {
+      "get": {
+        "operationId": "list_policies_api_v1_policies_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PolicyVersionListResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Policies",
+        "tags": [
+          "policies"
+        ]
+      }
+    },
+    "/api/v1/runs/{run_id}": {
+      "get": {
+        "operationId": "get_run_api_v1_runs__run_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "run_id",
+            "required": true,
+            "schema": {
+              "title": "Run Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Run",
+        "tags": [
+          "runs"
+        ]
+      }
+    },
+    "/api/v1/runs/{run_id}/cancel": {
+      "post": {
+        "operationId": "cancel_run_api_v1_runs__run_id__cancel_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "run_id",
+            "required": true,
+            "schema": {
+              "title": "Run Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Cancel Run",
+        "tags": [
+          "runs"
+        ]
+      }
+    },
+    "/api/v1/scenario-sets": {
+      "post": {
+        "operationId": "create_scenario_set_api_v1_scenario_sets_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScenarioSetCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScenarioSetResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Scenario Set",
+        "tags": [
+          "scenario-sets"
+        ]
+      }
+    },
+    "/api/v1/scenario-sets/{scenario_set_id}": {
+      "get": {
+        "operationId": "get_scenario_set_api_v1_scenario_sets__scenario_set_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "scenario_set_id",
+            "required": true,
+            "schema": {
+              "title": "Scenario Set Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScenarioSetResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Scenario Set",
+        "tags": [
+          "scenario-sets"
+        ]
+      }
+    },
+    "/api/v1/trials": {
+      "get": {
+        "operationId": "list_trials_api_v1_trials_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "experiment_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Experiment Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "policy_version_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Policy Version Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "terminal_outcome",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Terminal Outcome"
+            }
+          },
+          {
+            "in": "query",
+            "name": "object",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Object"
+            }
+          },
+          {
+            "in": "query",
+            "name": "reviewed",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Reviewed"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maximum": 100,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Limit"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrialListResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Trials",
+        "tags": [
+          "trials"
+        ]
+      }
+    },
+    "/api/v1/trials/{trial_id}": {
+      "get": {
+        "operationId": "get_trial_api_v1_trials__trial_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "trial_id",
+            "required": true,
+            "schema": {
+              "title": "Trial Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrialResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Trial",
+        "tags": [
+          "trials"
+        ]
+      }
+    },
+    "/api/v1/trials/{trial_id}/annotations": {
+      "post": {
+        "operationId": "create_annotation_api_v1_trials__trial_id__annotations_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "trial_id",
+            "required": true,
+            "schema": {
+              "title": "Trial Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnnotationCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnnotationResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Annotation",
+        "tags": [
+          "annotations"
+        ]
+      }
+    },
+    "/api/v1/trials/{trial_id}/artifacts": {
+      "get": {
+        "operationId": "list_trial_artifacts_api_v1_trials__trial_id__artifacts_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "trial_id",
+            "required": true,
+            "schema": {
+              "title": "Trial Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArtifactListResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Trial Artifacts",
+        "tags": [
+          "artifacts"
+        ]
+      }
+    },
+    "/api/v1/trials/{trial_id}/events": {
+      "get": {
+        "operationId": "list_trial_events_api_v1_trials__trial_id__events_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "trial_id",
+            "required": true,
+            "schema": {
+              "title": "Trial Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maximum": 100,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Limit"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrialEventListResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Trial Events",
+        "tags": [
+          "trials"
+        ]
+      }
+    },
+    "/health/live": {
+      "get": {
+        "description": "Dependency-free liveness probe.",
+        "operationId": "live_health_live_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "title": "Response Live Health Live Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Live",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/health/ready": {
+      "get": {
+        "description": "Bounded readiness probe for database and artifact-store access.",
+        "operationId": "ready_health_ready_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Ready",
+        "tags": [
+          "health"
+        ]
+      }
+    }
+  }
+}
