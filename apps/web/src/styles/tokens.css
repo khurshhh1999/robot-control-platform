@@ -1,0 +1,20 @@
+:root {
+  color-scheme: light;
+  --rcp-color-canvas: #f3f6f8;
+  --rcp-color-surface: #ffffff;
+  --rcp-color-text: #17212b;
+  --rcp-color-muted: #3e4c59;
+  --rcp-color-border: #c5d0da;
+  --rcp-color-focus: #0b4f8a;
+  --rcp-color-danger: #7a1f1f;
+  --rcp-color-danger-surface: #fdecec;
+  --rcp-color-link: #0b4f8a;
+  --rcp-font-sans: "Segoe UI", "Helvetica Neue", sans-serif;
+  --rcp-space-2: 0.5rem;
+  --rcp-space-3: 0.75rem;
+  --rcp-space-4: 1rem;
+  --rcp-space-5: 1.5rem;
+  --rcp-space-6: 2rem;
+  --rcp-radius: 0.375rem;
+  --rcp-line: 1.5;
+}

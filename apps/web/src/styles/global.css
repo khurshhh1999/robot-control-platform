@@ -1,0 +1,17 @@
+body {
+  margin: 0;
+  background: var(--rcp-color-canvas);
+  color: var(--rcp-color-text);
+  font-family: var(--rcp-font-sans);
+  line-height: var(--rcp-line);
+}
+
+:focus-visible {
+  outline: 2px solid var(--rcp-color-focus);
+  outline-offset: 2px;
+}
+
+button,
+a {
+  font: inherit;
+}

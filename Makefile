@@ -1,5 +1,5 @@
 .PHONY: install format format-check lint typecheck test test-integration test-e2e \
-	migration-check compose-build compose-up compose-down precommit ci \
+	migration-check contracts-check compose-build compose-up compose-down precommit ci \
 	test-simulator-smoke test-camera-smoke test-scenario-smoke test-motion-smoke
 
 UV ?= uv
@@ -25,6 +25,11 @@ typecheck:
 
 test:
 	$(UV) run pytest
+	$(PNPM) --filter @robot-control-platform/web run test
+
+contracts-check:
+	$(UV) run python -m robot_control_platform_api.openapi_export --check packages/contracts/openapi.json
+	$(PNPM) --filter @robot-control-platform/contracts run check
 
 test-integration:
 	$(UV) run pytest tests/integration
@@ -76,6 +81,6 @@ compose-up:
 compose-down:
 	docker compose down
 
-precommit: format-check lint typecheck
+precommit: format-check lint typecheck contracts-check
 
-ci: format-check lint typecheck test
+ci: format-check lint typecheck test contracts-check
